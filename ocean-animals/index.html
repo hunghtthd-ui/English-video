@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ocean Animals - Vocabulary Spelling Quiz</title>
+  <!-- Tailwind CSS cho thiết kế giao diện hiện đại, co giãn tốt -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts - Phông chữ Fredoka bo tròn thân thiện với trẻ em -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background: linear-gradient(180deg, #b3e5fc 0%, #0288d1 100%);
+      min-height: 100vh;
+    }
+    /* Hiệu ứng bong bóng nước nổi lên ở nền */
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatUp 12s infinite linear;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) translateX(0) scale(0.5);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.6;
+      }
+      90% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-110vh) translateX(100px) scale(1.2);
+        opacity: 0;
+      }
+    }
+    /* Hiệu ứng nảy chữ khi học sinh điền */
+    .letter-pop {
+      animation: pop 0.2s ease-out;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.8); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="relative overflow-x-hidden flex flex-col justify-between p-4 md:p-8">
+
+  <!-- Bong bóng nước trang trí nền -->
+  <div id="bubble-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+  <!-- Tiêu đề chính -->
+  <header class="w-full max-w-4xl mx-auto text-center mb-6 z-10">
+    <h1 class="text-3xl md:text-5xl font-bold text-white drop-shadow-lg flex items-center justify-center gap-3">
+      <span>🐳</span> Ocean Adventure Spelling! 🐙
+    </h1>
+    <p class="text-blue-900 font-medium text-sm md:text-base mt-2">Watch the video to learn, then spell the sea animals!</p>
+  </header>
+
+  <!-- Khung nội dung chính -->
+  <main class="w-full max-w-3xl mx-auto bg-white/90 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-2xl z-10 border-4 border-blue-300">
+    
+    <!-- PHẦN 1: Học qua Video YouTube -->
+    <div id="video-section" class="space-y-6">
+      <div class="bg-blue-100 p-4 rounded-2xl border-2 border-blue-200">
+        <h2 class="text-xl md:text-2xl font-bold text-blue-800 mb-2 text-center">📺 Step 1: Watch & Learn</h2>
+        <p class="text-gray-700 text-center text-sm md:text-base">Click the button below to watch the ocean vocabulary video, then return here to start the spelling challenge!</p>
+      </div>
+      
+      <!-- Khung hiển thị nút bấm chuyển hướng thay thế hoàn toàn cho Iframe YouTube -->
+      <div class="relative w-full rounded-2xl overflow-hidden shadow-lg">
+        <a href="https://www.youtube.com/watch?v=gVeO940dpmo" target="_blank" id="video-link-btn" onclick="handleVideoClick()" 
+           class="flex flex-col items-center justify-center p-8 bg-gradient-to-r from-sky-400 to-blue-600 rounded-2xl text-white font-extrabold text-2xl md:text-3xl shadow-lg hover:from-sky-500 hover:to-blue-700 transition-all transform hover:scale-[1.02] active:scale-98 duration-200 text-center min-h-[220px] border-4 border-blue-200 cursor-pointer group">
+          <span class="text-6xl mb-4 group-hover:scale-110 transition-transform duration-200 animate-bounce">🎬</span>
+          <span class="drop-shadow-md">Khám phá động vật đại dương</span>
+          <span class="text-xs md:text-sm font-medium text-sky-100 mt-3 bg-blue-950/40 px-4 py-1.5 rounded-full">
+            Click to watch video in new tab ↗️
+          </span>
+        </a>
+      </div>
+
+      <!-- Trạng thái xem video -->
+      <div class="flex flex-col items-center justify-center space-y-4 pt-2">
+        <div id="video-status-text" class="text-amber-600 font-bold text-center flex items-center gap-2">
+          <span class="animate-pulse">⏳</span> Waiting for you to explore the ocean video...
+        </div>
+        
+        <!-- Nút bắt đầu Quiz (Bị khóa cho đến khi học sinh nhấn xem video) -->
+        <button id="start-quiz-btn" disabled 
+                class="w-full sm:w-auto px-8 py-4 bg-gray-400 text-white font-extrabold text-xl rounded-2xl shadow-lg transition-all cursor-not-allowed transform hover:scale-100 flex items-center justify-center gap-3">
+          <span>🔒</span> Complete Video to Start Quiz
+        </button>
+        
+        <!-- Nút khẩn cấp bỏ qua kiểm tra dành cho giáo viên/phụ huynh -->
+        <button onclick="unlockQuiz()" class="text-xs text-blue-500/50 hover:text-blue-600 underline pt-4">
+          Bypass video check (Admin/Teacher only)
+        </button>
+      </div>
+    </div>
+
+    <!-- PHẦN 2: Giao diện làm bài tập Quiz -->
+    <div id="quiz-section" class="hidden space-y-6">
+      
+      <!-- Thanh thông tin: Tiến trình, điểm số và số lượt còn lại -->
+      <div class="flex flex-col sm:flex-row justify-between items-center bg-blue-50 p-4 rounded-2xl border-2 border-blue-100 gap-3">
+        <div class="text-lg font-bold text-blue-900 flex items-center gap-2">
+          <span>🎯</span> Progress: <span id="progress-text" class="text-blue-600">1 / 9</span>
+        </div>
+        
+        <!-- Bộ đếm điểm số -->
+        <div class="flex gap-4 text-sm md:text-base font-semibold">
+          <div class="text-emerald-600">Correct: <span id="header-correct">0</span></div>
+          <div class="text-red-500">Incorrect: <span id="header-incorrect">0</span></div>
+        </div>
+
+        <!-- Bộ đếm số lượt đoán sai còn lại cho câu hiện tại -->
+        <div class="flex items-center gap-1">
+          <span class="text-gray-600 text-sm font-bold mr-1">Attempts Left:</span>
+          <div id="attempts-container" class="flex gap-1 text-xl">
+            ❤️ ❤️ ❤️
+          </div>
+        </div>
+      </div>
+
+      <!-- Khung hiển thị: Hình ảnh và nút phát âm thanh -->
+      <div class="flex flex-col items-center space-y-4">
+        <!-- Khung hình ảnh từ vựng (Hiển thị đầy đủ, không bị cắt xén bất kể ảnh dọc/ngang) -->
+        <div class="w-full max-w-sm h-64 bg-sky-50 rounded-2xl border-4 border-sky-200 overflow-hidden flex items-center justify-center shadow-inner relative">
+          <img id="vocab-image" src="" alt="Vocabulary Animal" 
+               class="max-w-full max-h-full object-contain p-2">
+          <!-- Biểu tượng Emoji dự phòng khi mất mạng hoặc lỗi ảnh -->
+          <div id="emoji-fallback" class="hidden text-8xl animate-bounce select-none"></div>
+        </div>
+
+        <!-- Nút nghe lại từ vựng -->
+        <button onclick="playVocabAudio()" 
+                class="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-base md:text-lg transform active:scale-95">
+          <span>🔊</span> Listen Word Again
+        </button>
+      </div>
+
+      <!-- Khung các ô trống điền từ -->
+      <div class="space-y-2">
+        <p class="text-center text-xs text-gray-500 uppercase font-bold tracking-widest">Spelling Workspace</p>
+        <div id="slots-container" class="flex flex-wrap justify-center gap-2 py-4 min-h-[4.5rem] bg-amber-50/50 rounded-2xl border-2 border-dashed border-amber-200 px-2">
+          <!-- Các ô chữ sẽ tự động được thêm vào đây -->
+        </div>
+      </div>
+
+      <!-- Ngân hàng ký tự xáo trộn -->
+      <div class="space-y-2">
+        <p class="text-center text-xs text-gray-500 uppercase font-bold tracking-widest">Letter Bank (Click or type on keyboard)</p>
+        <div id="letters-pool" class="flex flex-wrap justify-center gap-3 py-2">
+          <!-- Các ký tự xáo trộn sẽ xuất hiện ở đây -->
+        </div>
+      </div>
+
+      <!-- Các nút chức năng chính -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-4">
+        <button id="btn-reset" onclick="resetSpelling()" 
+                class="flex-1 py-4 bg-orange-100 hover:bg-orange-200 border-2 border-orange-400 text-orange-700 font-bold text-lg rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98">
+          <span>🔄</span> Clear & Reset
+        </button>
+        
+        <button id="btn-check" onclick="checkAnswer()" 
+                class="flex-[2] py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xl rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 transform active:scale-95">
+          <span>🚀</span> Check Answer (Enter)
+        </button>
+      </div>
+
+      <!-- Khung thông báo kết quả (Đúng/Sai) trực tiếp trên trang làm bài -->
+      <div id="feedback-alert" class="hidden p-4 rounded-2xl text-center font-bold text-lg border-2 animate-bounce">
+        <!-- Văn bản thông báo sẽ được chèn qua JavaScript -->
+      </div>
+      
+      <!-- Vùng hiển thị nút chuyển câu tiếp theo hoặc xem đáp án -->
+      <div id="next-action-container" class="hidden text-center pt-2">
+        <button id="btn-next" onclick="nextQuestion()" 
+                class="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-extrabold text-2xl rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95 animate-pulse">
+          <span>👉</span> Next Question
+        </button>
+      </div>
+
+    </div>
+
+    <!-- PHẦN 3: Màn hình hiển thị kết quả chung cuộc -->
+    <div id="results-section" class="hidden text-center space-y-6 py-6">
+      <div class="text-6xl animate-bounce">🏆</div>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-blue-900">Adventure Completed!</h2>
+      <p class="text-lg text-gray-700">You did amazing navigating through the deep ocean spelling challenge!</p>
+      
+      <!-- Bảng thống kê chi tiết -->
+      <div class="grid grid-cols-2 gap-4 max-w-md mx-auto bg-blue-50 p-6 rounded-2xl border-2 border-blue-200">
+        <div class="bg-white p-4 rounded-xl shadow-sm">
+          <p class="text-gray-500 text-sm font-bold uppercase">Correct Words</p>
+          <p id="stat-correct" class="text-3xl font-extrabold text-emerald-600">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm">
+          <p class="text-gray-500 text-sm font-bold uppercase">Total Mistakes</p>
+          <p id="stat-incorrect" class="text-3xl font-extrabold text-red-500">0</p>
+        </div>
+      </div>
+
+      <!-- Nút chơi lại từ đầu -->
+      <div class="pt-4">
+        <button onclick="restartQuiz()" 
+                class="px-10 py-4 bg-gradient-to-r from-teal-400 to-emerald-500 hover:from-teal-500 hover:to-emerald-600 text-white font-extrabold text-xl rounded-2xl shadow-xl transition-all transform hover:scale-105 active:scale-95">
+          🔄 Play Adventure Again
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Phần chân trang hướng dẫn phím tắt -->
+  <footer class="w-full text-center text-white/80 font-medium text-xs mt-8 z-10 space-y-1">
+    <p>© Ocean Spelling Adventure. Optimized for both Mobile and Desktop.</p>
+    <p>Keyboard support: Press any letter to spell, <kbd class="px-1.5 py-0.5 bg-blue-900/40 rounded">Backspace</kbd> to delete, and <kbd class="px-1.5 py-0.5 bg-blue-900/40 rounded">Enter</kbd> to check!</p>
+  </footer>
+
+  <script>
+    // Sự kiện khi học sinh click vào link video "Khám phá động vật đại dương"
+    function handleVideoClick() {
+      // Gọi hàm mở khóa bài tập ngay lập tức
+      unlockQuiz();
+    }
+
+    // Mở khóa bài tập Quiz sau khi học sinh click hoặc nhấn bỏ qua
+    function unlockQuiz() {
+      const startBtn = document.getElementById('start-quiz-btn');
+      const statusText = document.getElementById('video-status-text');
+      
+      startBtn.disabled = false;
+      startBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+      startBtn.classList.add('bg-gradient-to-r', 'from-yellow-400', 'to-orange-500', 'hover:from-yellow-500', 'hover:to-orange-600', 'transform', 'hover:scale-105', 'active:scale-95');
+      startBtn.innerHTML = '✨ Start Adventure Quiz! ✨';
+      
+      statusText.innerHTML = '🎉 Awesome! You have completed watching the video. Ready to start spelling!';
+      statusText.classList.remove('text-amber-600');
+      statusText.classList.add('text-emerald-700');
+
+      // Sự kiện click bắt đầu trò chơi
+      startBtn.onclick = function() {
+        document.getElementById('video-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+        initQuiz();
+      };
+    }
+  </script>
+
+  <!-- Script logic chính của trò chơi -->
+  <script>
+    // ------------------------------------------------------------------------
+    // Danh sách từ vựng: Đường dẫn hình ảnh Unsplash chất lượng cao & Emoji dự phòng
+    // ------------------------------------------------------------------------
+    const vocabList = [
+      {
+        word: "dolphin",
+        emoji: "🐬",
+        image: "https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        word: "clownfish",
+        emoji: "🐠",
+        image: "https://media2.cdn.bulkreefsupply.com/media/catalog/product/cache/c8225047e3f199b6e75c4a7f9e30955e/_/0/_0006_255287-brs-livestock-truepercula-016.jpg?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        word: "crab",
+        emoji: "🦀",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRMt_w3WrMC8hvz8q_7UMs8MFkH5qDCnW2wUkXVGItKW_1CtYwODK-WBA&s=10?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        word: "whale",
+        emoji: "🐋",
+        },
+      {
+        word: "starfish",
+        emoji: "⭐",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNthJzcWT1vCN2xFAb5JrVtd7fNxecqOY4iV9pYwF1CXwKBQJYzVBjJUA&s=10?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        word: "octopus",
+        emoji: "🐙",
+        image: "https://images.indianexpress.com/2025/06/Octopus.jpg?w=1200?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        word: "seahorse",
+        emoji: "🦄",
+        image: "https://topshelfaquatics.com/cdn/shop/files/Tiger_Tail_Seahorse.png?v=1768595623?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        word: "shark",
+        emoji: "🦈",
+        image: "https://images.unsplash.com/photo-1560275669-46c5a88d6a4c?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        word: "pufferfish",
+        emoji: "🐡",
+        image: "https://www.keywestaquarium.com/wp-content/uploads/2024/12/puffer-fish-mobile.jpg?auto=format&fit=crop&w=600&q=80"
+      }
+    ];
+
+    // Các câu khen ngợi ngẫu nhiên khi trả lời đúng
+    const praiseQuotes = ["Well done", "Good job", "Excellent", "Very good"];
+
+    // Đối tượng Audio Context để tạo âm thanh trực tiếp
+    let audioCtx = null;
+    let GeistVoices = [];
+
+    // Các biến quản lý trạng thái trò chơi
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let attemptsLeft = 3;
+    let correctAnswersCount = 0;
+    let incorrectAnswersCount = 0;
+    
+    // Mảng lưu trữ trạng thái các ô chữ và ngân hàng chữ cái
+    let targetLetters = [];     // Chứa các ký tự của từ hiện tại (VD: ['d', 'o', 'l', 'p', 'h', 'i', 'n'])
+    let userSelection = [];     // Chứa trạng thái các ô đã điền { id, letter } hoặc null
+    let scrambledPool = [];     // Chứa danh sách chữ cái xáo trộn { id, letter, used }
+
+    // Khởi tạo Audio Context khi có tương tác đầu tiên của người dùng
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Trình tải danh sách giọng đọc của hệ thống (Giải quyết lỗi đồng bộ giọng đọc)
+    function loadVoices() {
+      if ('speechSynthesis' in window) {
+        GeistVoices = window.speechSynthesis.getVoices();
+      }
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
+    }
+
+    // Phát âm thanh hiệu ứng bằng Web Audio API gốc (Độ tin cậy cao, không sợ chết link file âm thanh)
+    function playSoundEffect(type) {
+      try {
+        initAudioContext();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'correct') {
+          // Hiệu ứng âm thanh thắng cuộc: Hợp âm vui tươi tăng dần
+          osc.type = 'triangle';
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(0.15, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+          osc.frequency.setValueAtTime(523.25, now); // nốt Đô 5
+          osc.frequency.setValueAtTime(659.25, now + 0.1); // nốt Mi 5
+          osc.frequency.setValueAtTime(783.99, now + 0.2); // nốt Sol 5
+          osc.frequency.setValueAtTime(1046.50, now + 0.3); // nốt Đô 6
+
+          osc.start(now);
+          osc.stop(now + 0.5);
+
+        } else if (type === 'wrong') {
+          // Hiệu ứng âm thanh báo sai: Âm trầm giật ngược xuống
+          osc.type = 'sawtooth';
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+          gain.gain.linearRampToValueAtTime(0.2, now + 0.2);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+
+          osc.start(now);
+          osc.stop(now + 0.4);
+        }
+      } catch (err) {
+        console.warn("Web Audio Sound Effect failed: ", err);
+      }
+    }
+
+    // Engine đọc văn bản bằng TTS giọng nữ chuẩn (Đọc chậm rãi, phát âm rõ từng chữ)
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Ngắt âm đang phát dở trước đó
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.65; // Đọc chậm rãi cho trẻ em dễ bắt chước
+        utterance.pitch = 1.25; // Giọng hơi cao tạo nét nữ dễ thương, sinh động
+
+        // Tìm kiếm cấu hình giọng nữ tiếng Anh phù hợp nhất
+        const voices = GeistVoices.length > 0 ? GeistVoices : window.speechSynthesis.getVoices();
+        const femaleVoice = voices.find(voice => 
+          voice.lang.includes('en') && 
+          (voice.name.toLowerCase().includes('female') || 
+           voice.name.toLowerCase().includes('zira') || 
+           voice.name.toLowerCase().includes('google us english') ||
+           voice.name.toLowerCase().includes('samantha') ||
+           voice.name.toLowerCase().includes('hazel'))
+        );
+
+        if (femaleVoice) {
+          utterance.voice = femaleVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // Hàm trộn ngẫu nhiên một mảng (Thuật toán Fisher-Yates)
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Khởi tạo bài tập Quiz mới
+    function initQuiz() {
+      // Xáo trộn hoàn toàn danh sách câu hỏi
+      questions = shuffleArray([...vocabList]);
+      currentQuestionIndex = 0;
+      correctAnswersCount = 0;
+      incorrectAnswersCount = 0;
+      
+      // Khởi tạo bảng điểm
+      document.getElementById('header-correct').innerText = "0";
+      document.getElementById('header-incorrect').innerText = "0";
+
+      loadQuestion();
+    }
+
+    // Tải câu hỏi hiện tại
+    function loadQuestion() {
+      const data = questions[currentQuestionIndex];
+      attemptsLeft = 3;
+
+      // Cập nhật thanh hiển thị tiến trình và lượt chơi
+      document.getElementById('progress-text').innerText = `${currentQuestionIndex + 1} / ${questions.length}`;
+      updateAttemptsDisplay();
+
+      // Ẩn bảng thông báo kết quả và nút chuyển câu tiếp theo
+      const feedback = document.getElementById('feedback-alert');
+      feedback.classList.add('hidden');
+      document.getElementById('next-action-container').classList.add('hidden');
+      document.getElementById('btn-check').disabled = false;
+      document.getElementById('btn-reset').disabled = false;
+
+      // Cấu hình tải hình ảnh & bộ nạp Emoji dự phòng khi xảy ra sự cố tải ảnh
+      const img = document.getElementById('vocab-image');
+      const fallbackDiv = document.getElementById('emoji-fallback');
+      
+      // Định nghĩa trình xử lý lỗi ảnh ngay trong JS để tránh lỗi gọi hàm khi chưa kịp khởi tạo
+      img.onerror = function() {
+        img.classList.add('hidden');
+        fallbackDiv.classList.remove('hidden');
+      };
+
+      img.src = data.image;
+      img.classList.remove('hidden');
+      fallbackDiv.innerText = data.emoji;
+      fallbackDiv.classList.add('hidden');
+
+      // Tách chữ cái từ đáp án
+      targetLetters = data.word.toLowerCase().split('');
+      userSelection = Array(targetLetters.length).fill(null);
+
+      // Thiết lập ngân hàng chữ cái xáo trộn (Bỏ qua khoảng trắng nếu có)
+      scrambledPool = targetLetters
+        .filter(char => char !== ' ')
+        .map((char, index) => {
+          return {
+            id: `letter-${index}-${Math.random().toString(36).substr(2, 4)}`,
+            letter: char,
+            used: false
+          };
+        });
+      
+      // Xáo trộn ngân hàng chữ cái
+      shuffleArray(scrambledPool);
+
+      // Tự động điền ký tự khoảng trắng vào ô đáp án nếu từ có nhiều từ (Hỗ trợ khoảng trắng)
+      targetLetters.forEach((char, idx) => {
+        if (char === ' ') {
+          userSelection[idx] = { id: `space-${idx}`, letter: ' ' };
+        }
+      });
+
+      // Vẽ giao diện các ô trống và chữ xáo trộn
+      renderSlots();
+      renderLetterPool();
+
+      // Tự động phát âm thanh từ vựng khi câu hỏi mới bắt đầu
+      setTimeout(() => {
+        speakText(data.word);
+      }, 500);
+    }
+
+    // Đọc lại từ vựng
+    function playVocabAudio() {
+      const data = questions[currentQuestionIndex];
+      speakText(data.word);
+    }
+
+    // Vẽ giao diện các ô điền chữ
+    function renderSlots() {
+      const container = document.getElementById('slots-container');
+      container.innerHTML = '';
+
+      userSelection.forEach((selectedItem, index) => {
+        const slotDiv = document.createElement('div');
+        
+        if (selectedItem && selectedItem.letter === ' ') {
+          // Ô trống ngăn cách giữa hai từ (Khoảng trắng)
+          slotDiv.className = "w-6 h-12 md:w-8 md:h-14 flex items-center justify-center pointer-events-none";
+          slotDiv.innerText = "";
+        } else {
+          // Ô ký tự bình thường
+          slotDiv.className = "w-11 h-11 md:w-14 md:h-14 flex items-center justify-center rounded-xl font-extrabold text-2xl uppercase transition-all duration-150 relative cursor-pointer shadow-sm border-2";
+
+          if (selectedItem) {
+            // Khi ô đã được điền ký tự
+            slotDiv.className += " bg-gradient-to-br from-yellow-300 to-amber-400 border-amber-500 text-amber-900 hover:brightness-105 active:scale-95 scale-100 letter-pop";
+            slotDiv.innerText = selectedItem.letter;
+            
+            // Nhấn vào ký tự đã điền sẽ bật ngược ra ngoài ngân hàng chữ cái
+            slotDiv.addEventListener('click', () => {
+              deselectLetter(index);
+            });
+          } else {
+            // Ô trống chờ điền
+            slotDiv.className += " bg-white/70 border-blue-200 text-transparent border-dashed";
+            slotDiv.innerText = "";
+          }
+        }
+
+        container.appendChild(slotDiv);
+      });
+    }
+
+    // Vẽ giao diện ngân hàng chữ cái xáo trộn
+    function renderLetterPool() {
+      const container = document.getElementById('letters-pool');
+      container.innerHTML = '';
+
+      scrambledPool.forEach(item => {
+        const btn = document.createElement('button');
+        btn.innerText = item.letter;
+        btn.className = "w-11 h-11 md:w-14 md:h-14 font-extrabold text-2xl uppercase rounded-xl border-2 transition-all duration-150 transform flex items-center justify-center shadow-md active:scale-90 select-none";
+
+        if (item.used) {
+          // Ký tự đã được chọn (Ẩn đi nhưng giữ lại khung diện tích trống)
+          btn.className += " bg-blue-100 border-blue-200 text-transparent opacity-0 cursor-default pointer-events-none";
+        } else {
+          // Ký tự sẵn sàng để chọn
+          btn.className += " bg-white border-blue-400 text-blue-800 hover:bg-blue-50 active:translate-y-0.5 hover:scale-105";
+          btn.addEventListener('click', () => {
+            selectLetter(item);
+          });
+        }
+
+        container.appendChild(btn);
+      });
+    }
+
+    // Chọn chữ cái và đẩy vào ô trống đầu tiên
+    function selectLetter(poolItem) {
+      initAudioContext();
+      const emptySlotIndex = userSelection.indexOf(null);
+      if (emptySlotIndex !== -1) {
+        userSelection[emptySlotIndex] = {
+          id: poolItem.id,
+          letter: poolItem.letter
+        };
+        poolItem.used = true;
+
+        renderSlots();
+        renderLetterPool();
+      }
+    }
+
+    // Bỏ chọn chữ cái (Học sinh nhấn vào ô điền) -> Văng ngược về ngân hàng chữ cái
+    function deselectLetter(slotIndex) {
+      const selectedItem = userSelection[slotIndex];
+      if (selectedItem && selectedItem.letter !== ' ') {
+        const poolItem = scrambledPool.find(p => p.id === selectedItem.id);
+        if (poolItem) {
+          poolItem.used = false;
+        }
+
+        userSelection[slotIndex] = null;
+
+        renderSlots();
+        renderLetterPool();
+      }
+    }
+
+    // Xóa sạch và làm lại câu hiện tại
+    function resetSpelling() {
+      userSelection = userSelection.map(s => (s && s.letter === ' ') ? s : null);
+      scrambledPool.forEach(p => p.used = false);
+      renderSlots();
+      renderLetterPool();
+    }
+
+    // Cập nhật số trái tim lượt đoán còn lại
+    function updateAttemptsDisplay() {
+      const hearts = "❤️ ".repeat(attemptsLeft) || "💔";
+      document.getElementById('attempts-container').innerText = hearts;
+    }
+
+    // Kiểm tra kết quả trả lời
+    function checkAnswer() {
+      // Ngăn ngừa kiểm tra khi đã khóa thao tác
+      if (document.getElementById('btn-check').disabled) return;
+      initAudioContext();
+
+      const attemptWord = userSelection.map(s => s ? s.letter : '').join('');
+      const correctWord = questions[currentQuestionIndex].word.toLowerCase();
+
+      const feedback = document.getElementById('feedback-alert');
+      feedback.classList.remove('hidden', 'bg-emerald-100', 'border-emerald-400', 'text-emerald-800', 'bg-red-100', 'border-red-400', 'text-red-800');
+
+      if (attemptWord === correctWord) {
+        // ĐÚNG: Phát âm thanh, cộng điểm, hiển thị lời khen ngợi ngẫu nhiên
+        playSoundEffect('correct');
+        correctAnswersCount++;
+        document.getElementById('header-correct').innerText = correctAnswersCount;
+
+        const randomPraise = praiseQuotes[Math.floor(Math.random() * praiseQuotes.length)];
+        
+        feedback.innerText = `🌟 ${randomPraise}! "${correctWord.toUpperCase()}" is correct! 🎉`;
+        feedback.className += " bg-emerald-100 border-emerald-400 text-emerald-800";
+        
+        // Phát âm thanh giọng nữ lời khen
+        speakText(randomPraise);
+
+        // Khóa các nút làm bài và mở nút tiếp theo
+        document.getElementById('btn-check').disabled = true;
+        document.getElementById('btn-reset').disabled = true;
+        document.getElementById('next-action-container').classList.remove('hidden');
+
+      } else {
+        // SAI: Trừ mạng, phát âm thanh báo sai
+        playSoundEffect('wrong');
+        attemptsLeft--;
+        updateAttemptsDisplay();
+
+        if (attemptsLeft > 0) {
+          feedback.innerText = "❌ Incorrect! Let's try spelling again. Keep going! 💪";
+          feedback.className += " bg-red-100 border-red-400 text-red-800";
+          speakText("Try again");
+
+          // Tự động reset câu hỏi sau 600ms để học sinh làm lại thuận tiện
+          setTimeout(() => {
+            resetSpelling();
+          }, 600);
+
+        } else {
+          // Sai quá 3 lần: Hiển thị đáp án chính xác cho học sinh
+          incorrectAnswersCount++;
+          document.getElementById('header-incorrect').innerText = incorrectAnswersCount;
+
+          feedback.innerHTML = `⚠️ Out of attempts! The correct spelling is: <span class="text-xl font-extrabold uppercase underline">${correctWord}</span>. Let's study this and continue! 🐳`;
+          feedback.className += " bg-red-100 border-red-400 text-red-800";
+          
+          speakText(`The correct spelling is ${correctWord}`);
+
+          // Tự động lấp đầy từ đúng trực quan vào ô trống
+          userSelection = targetLetters.map((char, idx) => ({ id: `sol-${idx}`, letter: char }));
+          renderSlots();
+
+          // Khóa nút làm bài, mở nút chuyển câu hỏi
+          document.getElementById('btn-check').disabled = true;
+          document.getElementById('btn-reset').disabled = true;
+          document.getElementById('next-action-container').classList.remove('hidden');
+        }
+      }
+    }
+
+    // Chuyển sang câu hỏi tiếp theo
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        loadQuestion();
+      } else {
+        showQuizResults();
+      }
+    }
+
+    // Hiển thị báo cáo kết quả chung cuộc
+    function showQuizResults() {
+      document.getElementById('quiz-section').classList.add('hidden');
+      document.getElementById('results-section').classList.remove('hidden');
+
+      document.getElementById('stat-correct').innerText = correctAnswersCount;
+      document.getElementById('stat-incorrect').innerText = incorrectAnswersCount;
+      
+      speakText("Congratulations! You completed the whole ocean vocabulary adventure. Excellent!");
+    }
+
+    // Chơi lại từ đầu (Khởi động lại toàn bộ tiến trình)
+    function restartQuiz() {
+      document.getElementById('results-section').classList.add('hidden');
+      document.getElementById('quiz-section').classList.remove('hidden');
+      initQuiz();
+    }
+
+    // ------------------------------------------------------------------------
+    // Hỗ trợ sự kiện gõ bàn phím vật lý trên máy tính (PC)
+    // ------------------------------------------------------------------------
+    window.addEventListener('keydown', (e) => {
+      const quizActive = !document.getElementById('quiz-section').classList.contains('hidden');
+      const isNextActive = !document.getElementById('next-action-container').classList.contains('hidden');
+
+      if (!quizActive) return;
+
+      const key = e.key.toLowerCase();
+
+      if (key === 'enter') {
+        e.preventDefault();
+        if (isNextActive) {
+          nextQuestion();
+        } else {
+          checkAnswer();
+        }
+      } else if (key === 'backspace') {
+        // Chỉ ngăn chặn hành vi mặc định của trình duyệt khi có ký tự cần xóa thực sự
+        let lastIndex = -1;
+        for (let i = userSelection.length - 1; i >= 0; i--) {
+          if (userSelection[i] !== null && userSelection[i].letter !== ' ') {
+            lastIndex = i;
+            break;
+          }
+        }
+        if (lastIndex !== -1) {
+          e.preventDefault();
+          deselectLetter(lastIndex);
+        }
+      } else if (/^[a-z]$/.test(key)) {
+        // Tìm chữ cái chưa dùng khớp với phím vừa gõ
+        const match = scrambledPool.find(p => p.letter === key && !p.used);
+        if (match) {
+          selectLetter(match);
+        }
+      }
+    });
+
+    // ------------------------------------------------------------------------
+    // Bộ khởi tạo hiệu ứng bong bóng trang trí nền dưới đại dương
+    // ------------------------------------------------------------------------
+    function makeBubbles() {
+      const container = document.getElementById('bubble-container');
+      const bubbleCount = 15;
+      
+      for (let i = 0; i < bubbleCount; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        
+        const size = Math.random() * 40 + 10;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 100}%`;
+        
+        bubble.style.animationDuration = `${Math.random() * 6 + 8}s`;
+        bubble.style.animationDelay = `${Math.random() * 8}s`;
+
+        container.appendChild(bubble);
+      }
+    }
+
+    // Tự động khởi chạy hiệu ứng khi trình duyệt sẵn sàng
+    window.addEventListener('load', () => {
+      makeBubbles();
+      // Kích hoạt nạp sẵn giọng đọc trong Speech Synthesis
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+    });
+  </script>
+
+</body>
+</html>
