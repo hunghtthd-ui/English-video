@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-emerald-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Crocodile Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Bounce animation for correct feedback */
+        @keyframes bounce-custom {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-custom {
+            animation: bounce-custom 0.6s ease infinite;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between text-emerald-900 overflow-x-hidden">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-white border-b border-emerald-100 shadow-sm py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-600 text-white p-2 rounded-xl shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-emerald-800">Crocodile Practice</h1>
+                    <p class="text-xs text-emerald-500 font-medium">Interactive Learning English Session</p>
+                </div>
+            </div>
+            <div id="quiz-progress-badge" class="hidden bg-emerald-100 text-emerald-800 px-3.5 py-1 rounded-full text-xs font-bold tracking-wide">
+                QUESTION 1 OF 6
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Scrollable Area -->
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8 max-w-4xl mx-auto w-full">
+        
+        <!-- Welcome Screen & Audio Enable Gate -->
+        <div id="welcome-screen" class="bg-white rounded-3xl shadow-xl border border-emerald-100 p-8 text-center max-w-lg w-full mx-auto transform transition-all duration-300 hover:shadow-2xl">
+            <!-- Clickable Title to watch Video -->
+            <div onclick="playVideoIntro()" class="cursor-pointer group bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 hover:border-emerald-400 rounded-2xl p-6 mb-6 transition-all duration-200 transform hover:scale-[1.02] shadow-sm">
+                <span class="text-xs font-bold uppercase tracking-widest text-emerald-600 block mb-1">🎬 Click here to watch the lesson video on YouTube (opens in a new tab)</span>
+                <h2 class="text-4xl font-black text-emerald-800 tracking-tight flex items-center justify-center gap-3 group-hover:text-emerald-950">
+                    <span>Crocodile</span>
+                    <span class="inline-block animate-pulse text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                            <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </h2>
+            </div>
+
+            <p class="text-emerald-600 mb-6 text-sm leading-relaxed font-medium">
+                Watch the presentation on YouTube first, then tackle the interactive quiz!
+            </p>
+
+            <!-- Quiz Start Button (Hidden until video is played) -->
+            <button id="btn-start-quiz" onclick="startQuiz()" class="hidden w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-emerald-200 transition-all duration-200 transform hover:-translate-y-1 active:translate-y-0 text-lg flex items-center justify-center gap-3">
+                <span>Start Quiz Now</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Quiz Play Area (Hidden Initially) -->
+        <div id="quiz-area" class="hidden w-full bg-white rounded-3xl shadow-xl border border-emerald-100 overflow-hidden flex flex-col md:flex-row transition-all duration-300">
+            
+            <!-- Left Side: Visual / Graphic panel -->
+            <div class="md:w-5/12 bg-emerald-950 p-6 flex flex-col items-center justify-center relative text-white border-b md:border-b-0 md:border-r border-emerald-800 min-h-[220px]">
+                <div class="absolute inset-0 bg-[radial-gradient(#064e3b_1px,transparent_1px)] [background-size:16px_16px] opacity-30"></div>
+                
+                <!-- Display Graphic dynamically based on question -->
+                <div id="visual-container" class="relative z-10 w-full max-w-[200px] md:max-w-xs aspect-square flex items-center justify-center">
+                    <!-- Dynamic Graphic inserted here -->
+                </div>
+            </div>
+
+            <!-- Right Side: Interactive Panel -->
+            <div class="md:w-7/12 p-6 sm:p-8 flex flex-col justify-between min-h-[400px]">
+                
+                <div>
+                    <!-- Audio Control Bar & Header -->
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-500">Audio Assistant</span>
+                        <button onclick="replayCurrentSpeech()" class="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-xl font-semibold text-xs border border-emerald-200 transition active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+                            </svg>
+                            <span>Listen Again</span>
+                        </button>
+                    </div>
+
+                    <!-- Question Prompt Context -->
+                    <div class="mb-6">
+                        <h3 id="question-prompt" class="text-lg sm:text-xl font-bold text-emerald-950 leading-snug">
+                            Loading Question...
+                        </h3>
+                    </div>
+
+                    <!-- Active Exercise Input Space -->
+                    <div id="exercise-workspace" class="mb-6 min-h-[140px]">
+                        <!-- Dynamically filled with input fields, scrambled letters, choose 2 gaps, or standard MCQs -->
+                    </div>
+                </div>
+
+                <!-- Footer Operations: Check, Feedback, and Next Button -->
+                <div class="mt-4 border-t border-emerald-100 pt-4">
+                    <!-- Attempts Left tracker -->
+                    <div id="attempts-container" class="flex justify-between items-center text-xs text-emerald-600 font-medium mb-3">
+                        <span>Attempts tracking:</span>
+                        <span id="attempts-badge" class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md font-bold">Attempts: 0/3</span>
+                    </div>
+
+                    <!-- Action Row: Status / Submit -->
+                    <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                        <!-- Left: Inline feedback messages -->
+                        <div id="feedback-message" class="text-sm font-bold text-emerald-700 flex items-center gap-2 min-h-[36px]">
+                            <!-- Success or failure notifications go here -->
+                        </div>
+
+                        <!-- Right: Action Trigger Buttons -->
+                        <div class="flex gap-2">
+                            <button id="btn-submit" onclick="checkCurrentAnswer()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-md shadow-emerald-100 cursor-pointer">
+                                <span>Check Answer</span>
+                                <kbd class="hidden md:inline-block bg-emerald-800 text-emerald-100 text-[10px] px-1.5 py-0.5 rounded font-mono">Enter</kbd>
+                            </button>
+                            <button id="btn-next" onclick="advanceNextQuestion()" class="hidden bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-3 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-md shadow-amber-100">
+                                <span>Next Question</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Quiz Statistics / Scoreboard Screen (Hidden Initially) -->
+        <div id="scoreboard-screen" class="hidden w-full bg-white rounded-3xl shadow-xl border border-emerald-100 p-8 text-center max-w-lg mx-auto">
+            <div class="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-12 h-12">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.906.134-1.62.833-1.742 1.74a12.017 12.017 0 0 0 0 4.048c.12.906.835 1.606 1.742 1.74a15.223 15.223 0 0 0 13.5 0c.906-.134 1.62-.833 1.742-1.74a12.018 12.018 0 0 0 0-4.048c-.12-.906-.835-1.606-1.742-1.74A15.195 15.195 0 0 0 12 3.75c-2.316 0-4.51.516-6.47 1.486ZM21 11.25c0 .248-.034.49-.1.72m-17.9 0a7.39 7.39 0 0 1-.1-.72m13.5 3.375c0 .621-.503 1.125-1.125 1.125h-5.25A1.125 1.125 0 0 1 7.875 15v-1.5" />
+                </svg>
+            </div>
+            <h2 class="text-3xl font-extrabold text-emerald-950 mb-2">Quiz Completed!</h2>
+            <p class="text-emerald-600 mb-6 font-medium">Awesome effort on learning about Crocodiles!</p>
+            
+            <!-- Statistics metrics table -->
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+                    <span class="block text-2xl font-bold text-emerald-800" id="stat-perfect">0</span>
+                    <span class="text-xs font-semibold text-emerald-600 uppercase">First-Try Correct</span>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+                    <span class="block text-2xl font-bold text-emerald-800" id="stat-total">0</span>
+                    <span class="text-xs font-semibold text-emerald-600 uppercase">Total Questions</span>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 col-span-2">
+                    <span class="block text-2xl font-bold text-emerald-800" id="stat-accuracy">0%</span>
+                    <span class="text-xs font-semibold text-emerald-600 uppercase">First-Try Accuracy Rate</span>
+                </div>
+            </div>
+
+            <!-- Retry action -->
+            <button onclick="restartEntireQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                <span>Restart Lesson</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer Credits -->
+    <footer class="bg-emerald-950 text-emerald-300 py-6 px-6 text-center text-xs border-t border-emerald-900 mt-auto">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>&copy; 2026 Crocodile Practice Portal. All rights reserved.</p>
+            <p class="flex items-center gap-1">
+                Designed for GitHub Pages deployment. Made with 💚 and accessibility.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA STRUCTURES: QUIZ QUESTIONS ---
+        const QUESTIONS = [
+            {
+                id: 1,
+                type: "unscramble",
+                word: "crocodile",
+                prompt: "Unscramble the letters to form the word 'crocodile'.",
+                spokenPrompt: "crocodile",
+                visual: "crocodile"
+            },
+            {
+                id: 2,
+                type: "choose2",
+                sentence: "Crocodiles eat <span id='gap-0' class='px-3 py-1 bg-emerald-100 border-b-2 border-emerald-600 rounded mx-1 text-emerald-900 font-bold min-w-[70px] inline-block text-center align-middle'>_____</span>, turtles, and <span id='gap-1' class='px-3 py-1 bg-emerald-100 border-b-2 border-emerald-600 rounded mx-1 text-emerald-900 font-bold min-w-[70px] inline-block text-center align-middle'>_____</span>.",
+                prompt: "Choose the 2 correct words to complete the sentence.",
+                spokenPrompt: "Crocodiles eat fish, turtles, and crabs.",
+                options: ["chicken", "monkeys", "fish", "shark", "crabs"],
+                correct: ["fish", "crabs"] // Order independent check
+            },
+            {
+                id: 3,
+                type: "mcq",
+                prompt: "Are crocodiles big or small?",
+                spokenPrompt: "Are crocodiles big or small?",
+                options: [
+                    { key: "A", text: "big", correct: true },
+                    { key: "B", text: "small", correct: false }
+                ],
+                visual: "crocodile"
+            },
+            {
+                id: 4,
+                type: "mcq",
+                prompt: "Where do crocodiles live?",
+                spokenPrompt: "Where do crocodiles live?",
+                options: [
+                    { key: "A", text: "In the sea", correct: false },
+                    { key: "B", text: "In the mountain", correct: false },
+                    { key: "C", text: "In the rivers", correct: true }
+                ],
+                visual: "crocodile"
+            },
+            {
+                id: 5,
+                type: "mcq",
+                prompt: "How many teeth do Nile crocodiles have?",
+                spokenPrompt: "How many teeth do Nile crocodiles have?",
+                options: [
+                    { key: "A", text: "More than 60", correct: true },
+                    { key: "B", text: "10", correct: false },
+                    { key: "C", text: "0", correct: false },
+                    { key: "D", text: "20", correct: false }
+                ],
+                visual: "teeth"
+            },
+            {
+                id: 6,
+                type: "unscramble",
+                word: "a baby crocodile",
+                prompt: "Unscramble the letters to form the phrase 'a baby crocodile'. There is a space between words.",
+                spokenPrompt: "a baby crocodile",
+                visual: "baby"
+            }
+        ];
+
+        // --- STREAMING_CHUNK: Defining editable image links ---
+        // --- EASY-TO-EDIT IMAGE LINKS ---
+        const IMAGES = {
+            // Full Crocodile Image
+            crocodile: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQP_wjz4YcIivNW6SsgMZSxp2I_tr0yHLWwDAcuUibhAA&s=10?auto=format&fit=crop&w=500&q=80",
+            
+            // Crocodile teeth/mouth open
+            teeth: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRxdj490Dz1InZrBbmmyB-FNHf6Hr0i5W89y80uneKz-xKp3DtRaW-oLM&s=10?auto=format&fit=crop&w=500&q=80",
+            
+            // Baby crocodile
+            baby: "https://t3.ftcdn.net/jpg/09/38/23/02/360_F_938230207_be5lSfFP1V1MkseERd4Ker6l9gycZcPv.jpg?auto=format&fit=crop&w=500&q=80"
+        };
+
+        // --- STATE MANAGEMENT ---
+        let currentQuestionIdx = 0;
+        let attempts = 0;
+        let firstTryCorrectCount = 0;
+        let totalQuestionsLoaded = QUESTIONS.length;
+        
+        // Tracking states for inputs
+        let typedClean = ""; // Used for unscramble inputs
+        let targetClean = ""; // Target solution for unscramble without spaces
+        let scrambledLetters = []; // Current letter pool for unscramble
+        let choose2SelectedWords = [null, null]; // For Gap 1 and Gap 2 slots
+        let mcqSelectedKey = null;
+
+        // --- STREAMING_CHUNK: Programming synthesized sound effects ---
+        // --- AUDIO SYNTHESIS & SOUND EFFECT ENGINE ---
+        function playSoundEffect(type) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            
+            try {
+                const ctx = new AudioContext();
+                
+                if (type === 'success') {
+                    // Ascending cheerful double chime
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.12); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.24); // G5
+                    
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'failure') {
+                    // Sad descending low warning buzzer
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.3); // A2
+                    
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {
+                console.error("Synthesizer error:", e);
+            }
+        }
+
+        // --- STREAMING_CHUNK: Integrating TTS voices and pronunciation ---
+        // --- SPEECH SYNTHESIS ENGINE ---
+        let synthVoices = [];
+
+        function initSpeech() {
+            if ('speechSynthesis' in window) {
+                synthVoices = window.speechSynthesis.getVoices();
+                // Handle async loading of voices in some engines
+                window.speechSynthesis.onvoiceschanged = () => {
+                    synthVoices = window.speechSynthesis.getVoices();
+                };
+            }
+        }
+
+        // Play standard spoken phrase through Web Speech API
+        function speakText(text, callback) {
+            if (!('speechSynthesis' in window)) return;
+            
+            window.speechSynthesis.cancel(); // Abort active utterances
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Heuristics for a clear female English voice
+            let femaleVoice = synthVoices.find(voice => 
+                voice.lang.startsWith('en') && 
+                (voice.name.toLowerCase().includes('female') || 
+                 voice.name.toLowerCase().includes('google us') || 
+                 voice.name.toLowerCase().includes('zira') || 
+                 voice.name.toLowerCase().includes('samantha'))
+            );
+
+            // Fallback to any English voice
+            if (!femaleVoice) {
+                femaleVoice = synthVoices.find(voice => voice.lang.startsWith('en'));
+            }
+
+            if (femaleVoice) {
+                utterance.voice = femaleVoice;
+            }
+
+            // Requirements: Female, slow pace, high clarity
+            utterance.rate = 0.75; 
+            utterance.pitch = 1.15; 
+
+            if (callback) {
+                utterance.onend = callback;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- STREAMING_CHUNK: Creating motivational praise triggers ---
+        // Random spoken and visual praise for correct answers
+        function speakRandomPraise() {
+            const praises = ["Well done", "Good job", "Excellent", "Very good"];
+            const selectedPraise = praises[Math.floor(Math.random() * praises.length)];
+            
+            const feedbackEl = document.getElementById("feedback-message");
+            if (feedbackEl) {
+                feedbackEl.innerHTML = `
+                    <span class="text-emerald-600 flex items-center gap-1.5 font-bold animate-bounce-custom">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-emerald-600">
+                          <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.56-2.24a.75.75 0 1 1 1.06-1.06l3.75 3.75a.75.75 0 1 1-1.06 1.06l-3.75-3.75Zm-2.81 2.81a.75.75 0 1 0-1.06 1.06l1.5 1.5a.75.75 0 0 0 1.06 0l1.5-1.5a.75.75 0 1 0-1.06-1.06l-.97.97V11a.75.75 0 0 0-1.5 0v2.06l-.97-.97Z" clip-rule="evenodd" />
+                        </svg>
+                        <span>${selectedPraise}!</span>
+                    </span>
+                `;
+            }
+            speakText(selectedPraise);
+        }
+
+        // Initialize Video Embed and Unlock Quiz
+        function playVideoIntro() {
+            // Open YouTube link in a new browser tab
+            window.open("https://www.youtube.com/watch?v=nh5oZTgX88w&pp=ygUgY3LDtGNkaWxlIGVuZ2xpc2ggdmlkZW8gZm9yIGtpZHM%3D", "_blank");
+            
+            // Display and animate the locked "Start Quiz" button on the portal
+            const startBtn = document.getElementById("btn-start-quiz");
+            if (startBtn) {
+                startBtn.classList.remove("hidden");
+                startBtn.classList.add("animate-bounce-custom");
+                setTimeout(() => {
+                    startBtn.classList.remove("animate-bounce-custom");
+                }, 1500);
+            }
+        }
+
+        // Initialize Quiz
+        function startQuiz() {
+            // Unveil primary viewport layout
+            document.getElementById("welcome-screen").classList.add("hidden");
+            document.getElementById("quiz-area").classList.remove("hidden");
+            document.getElementById("quiz-progress-badge").classList.remove("hidden");
+            
+            currentQuestionIdx = 0;
+            attempts = 0;
+            firstTryCorrectCount = 0;
+            
+            loadQuestion(currentQuestionIdx);
+        }
+
+        function restartEntireQuiz() {
+            document.getElementById("scoreboard-screen").classList.add("hidden");
+            document.getElementById("quiz-area").classList.remove("hidden");
+            document.getElementById("quiz-progress-badge").classList.remove("hidden");
+            
+            currentQuestionIdx = 0;
+            attempts = 0;
+            firstTryCorrectCount = 0;
+            
+            loadQuestion(currentQuestionIdx);
+        }
+
+        // --- STREAMING_CHUNK: Managing dynamic question layout changes ---
+        // Main dynamic layout controller for each question
+        function loadQuestion(index) {
+            const q = QUESTIONS[index];
+            attempts = 0;
+            updateAttemptsBadge();
+
+            // Progress Banner
+            document.getElementById("quiz-progress-badge").innerText = `QUESTION ${index + 1} OF ${totalQuestionsLoaded}`;
+
+            // Handle Graphic illustration display
+            const visualContainer = document.getElementById("visual-container");
+            if (q.visual && IMAGES[q.visual]) {
+                visualContainer.innerHTML = `
+                    <img 
+                        src="${IMAGES[q.visual]}" 
+                        alt="${q.visual}" 
+                        class="w-full h-full object-cover rounded-2xl shadow-md border-2 border-emerald-800/40" 
+                        onerror="this.onerror=null; this.src='https://placehold.co/400x400/064e3b/ffffff?text=Image+Not+Found';"
+                    />
+                `;
+                visualContainer.parentElement.classList.remove("hidden");
+            } else {
+                visualContainer.parentElement.classList.add("hidden");
+            }
+
+            // Setup prompt
+            document.getElementById("question-prompt").innerText = q.prompt;
+
+            // Reset action buttons and clear feedback
+            document.getElementById("btn-submit").classList.remove("hidden");
+            document.getElementById("btn-next").classList.add("hidden");
+            document.getElementById("feedback-message").innerHTML = "";
+
+            // Render workspace based on exercise type
+            const workspace = document.getElementById("exercise-workspace");
+            workspace.innerHTML = "";
+
+            if (q.type === "unscramble") {
+                renderUnscramble(q, workspace);
+            } else if (q.type === "choose2") {
+                renderChoose2(q, workspace);
+            } else if (q.type === "mcq") {
+                renderMCQ(q, workspace);
+            }
+
+            // Speak the prompt automatically when page transitions
+            speakText(q.spokenPrompt);
+        }
+
+        function replayCurrentSpeech() {
+            const q = QUESTIONS[currentQuestionIdx];
+            speakText(q.spokenPrompt);
+        }
+
+        // --- STREAMING_CHUNK: Constructing letter pool unscramble inputs ---
+        // Unscramble Letters Implementation (Wordle style exact squares)
+        function renderUnscramble(q, container) {
+            typedClean = "";
+            targetClean = q.word.replace(/\s/g, "").toLowerCase();
+            
+            // Generate Scrambled pool characters (excluding spaces)
+            const characters = q.word.replace(/\s/g, "").split("");
+            scrambledLetters = shuffleArray([...characters]);
+
+            // Main layout wrapper
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex flex-col items-center w-full";
+
+            // Hidden input for robust keyboard focus across mobile and desktop
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "text";
+            hiddenInput.id = "unscramble-hidden-input";
+            hiddenInput.className = "absolute opacity-0 pointer-events-none";
+            hiddenInput.style.width = "1px";
+            hiddenInput.style.height = "1px";
+            hiddenInput.style.top = "-100px";
+            hiddenInput.autocomplete = "off";
+            hiddenInput.autocorrect = "off";
+            hiddenInput.autocapitalize = "off";
+            hiddenInput.spellcheck = false;
+
+            // Sync hidden inputs as students type on keyboard
+            hiddenInput.oninput = (e) => {
+                const rawVal = e.target.value;
+                // Only allow letters, limit length to exactly the target solution character count
+                const cleaned = rawVal.replace(/[^a-zA-Z]/g, "").toLowerCase().slice(0, targetClean.length);
+                typedClean = cleaned;
+                e.target.value = cleaned; // sync back to input
+                updateUnscrambleDisplay(q);
+            };
+
+            wrapper.appendChild(hiddenInput);
+
+            // Container displaying the individual character boxes
+            const squaresContainer = document.createElement("div");
+            squaresContainer.id = "unscramble-squares";
+            squaresContainer.className = "w-full cursor-pointer py-3";
+            
+            // Bring up virtual keyboard when tapping the letter-squares
+            squaresContainer.onclick = () => {
+                hiddenInput.focus();
+            };
+            wrapper.appendChild(squaresContainer);
+
+            // Assistive design hint
+            const hintText = document.createElement("p");
+            hintText.className = "text-center text-xs text-emerald-500 font-semibold mb-4 animate-pulse";
+            hintText.innerText = "Tap the squares or letter tiles to start typing:";
+            wrapper.appendChild(hintText);
+
+            // Display pool layout
+            const poolHeader = document.createElement("p");
+            poolHeader.className = "text-xs text-emerald-500 font-bold mb-2 uppercase tracking-wider self-start";
+            poolHeader.innerText = "Letter Pool:";
+            wrapper.appendChild(poolHeader);
+
+            const poolWrapper = document.createElement("div");
+            poolWrapper.id = "letter-pool";
+            poolWrapper.className = "flex flex-wrap gap-2 justify-center py-2 mb-4 w-full";
+            wrapper.appendChild(poolWrapper);
+
+            // Controls layout row
+            const controlsRow = document.createElement("div");
+            controlsRow.className = "flex justify-end gap-3 w-full";
+
+            const backspaceBtn = document.createElement("button");
+            backspaceBtn.className = "text-xs font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-100 hover:bg-emerald-200 px-3.5 py-2 rounded-xl transition flex items-center gap-1 shadow-sm cursor-pointer";
+            backspaceBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75 14.25 12m0 0 2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92-6.375-6.375a1.125 1.125 0 0 1 0-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 0 1 2.25 2.25v10.5a2.25 2.25 0 0 1-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33Z" />
+                </svg>
+                <span>Backspace</span>
+            `;
+            backspaceBtn.onclick = () => {
+                if (typedClean.length > 0) {
+                    typedClean = typedClean.slice(0, -1);
+                    hiddenInput.value = typedClean;
+                    updateUnscrambleDisplay(q);
+                }
+                hiddenInput.focus();
+            };
+
+            const clearBtn = document.createElement("button");
+            clearBtn.className = "text-xs font-bold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-2 rounded-xl transition border border-emerald-100 cursor-pointer";
+            clearBtn.innerText = "Clear All";
+            clearBtn.onclick = () => {
+                typedClean = "";
+                hiddenInput.value = "";
+                updateUnscrambleDisplay(q);
+                hiddenInput.focus();
+            };
+
+            controlsRow.appendChild(clearBtn);
+            controlsRow.appendChild(backspaceBtn);
+            wrapper.appendChild(controlsRow);
+
+            container.appendChild(wrapper);
+
+            // Initial render of empty/blank boxes
+            updateUnscrambleDisplay(q);
+
+            // Focus support for immediate typing on desktop
+            setTimeout(() => {
+                hiddenInput.focus();
+            }, 150);
+        }
+
+        // --- STREAMING_CHUNK: Updating the letter boxes based on state ---
+        // Refresh unscramble input squares and active status in letter pool
+        function updateUnscrambleDisplay(q) {
+            const squaresContainer = document.getElementById("unscramble-squares");
+            if (!squaresContainer) return;
+
+            const words = q.word.split(" ");
+            let cleanIdx = 0;
+
+            // Generate flex-wrapped containers grouping letters into words naturally
+            let html = '<div class="flex flex-wrap gap-x-6 gap-y-4 justify-center items-center">';
+            
+            words.forEach(word => {
+                html += '<div class="flex gap-1.5 sm:gap-2 justify-center">';
+                for (let i = 0; i < word.length; i++) {
+                    const isFilled = cleanIdx < typedClean.length;
+                    const char = isFilled ? typedClean[cleanIdx] : "";
+                    
+                    // Design matching theme: filled boxes pop out with bright borders
+                    const boxClass = isFilled
+                        ? "w-8 h-8 sm:w-11 sm:h-11 border-2 border-emerald-600 bg-emerald-100 text-emerald-950 rounded-xl flex items-center justify-center font-extrabold text-base sm:text-lg uppercase shadow-sm scale-105 transition-all transform duration-150"
+                        : "w-8 h-8 sm:w-11 sm:h-11 border-2 border-dashed border-emerald-200 bg-emerald-50/20 text-transparent rounded-xl flex items-center justify-center font-extrabold text-base sm:text-lg uppercase transition-all duration-150";
+
+                    html += `<div class="${boxClass}">${char}</div>`;
+                    cleanIdx++;
+                }
+                html += '</div>';
+            });
+            
+            html += '</div>';
+            squaresContainer.innerHTML = html;
+
+            // Sync letter pool buttons active/disabled styling
+            const poolContainer = document.getElementById("letter-pool");
+            if (!poolContainer) return;
+
+            poolContainer.innerHTML = "";
+            
+            // Map which indexes in scrambled pool are taken by current input sequence
+            let usedIndices = [];
+            let tempTyped = typedClean.split("");
+
+            tempTyped.forEach(char => {
+                const idx = scrambledLetters.findIndex((sc, sIdx) => sc.toLowerCase() === char && !usedIndices.includes(sIdx));
+                if (idx !== -1) {
+                    usedIndices.push(idx);
+                }
+            });
+
+            // Display interactive tiles
+            scrambledLetters.forEach((char, idx) => {
+                const isUsed = usedIndices.includes(idx);
+                const btn = document.createElement("button");
+                btn.innerText = char.toUpperCase();
+                btn.className = isUsed
+                    ? "w-9 h-9 sm:w-11 sm:h-11 bg-emerald-100 border border-emerald-200 rounded-xl font-bold text-emerald-400 text-base sm:text-lg opacity-40 pointer-events-none flex items-center justify-center transition"
+                    : "w-9 h-9 sm:w-11 sm:h-11 bg-white border-2 border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50 rounded-xl font-extrabold text-emerald-800 text-base sm:text-lg active:scale-95 flex items-center justify-center transition shadow-sm cursor-pointer";
+                
+                btn.onclick = (e) => {
+                    e.stopPropagation(); // Avoid triggering extra input focuses
+                    if (typedClean.length < targetClean.length) {
+                        typedClean += char.toLowerCase();
+                        const hiddenInput = document.getElementById("unscramble-hidden-input");
+                        if (hiddenInput) {
+                            hiddenInput.value = typedClean;
+                            hiddenInput.focus();
+                        }
+                        updateUnscrambleDisplay(q);
+                    }
+                };
+                poolContainer.appendChild(btn);
+            });
+        }
+
+        // --- STREAMING_CHUNK: Setting up choose-2 fill-in-the-blank questions ---
+        // Choose 2 Options Setup
+        function renderChoose2(q, container) {
+            choose2SelectedWords = [null, null];
+
+            // Render sentence block
+            const sentenceCard = document.createElement("div");
+            sentenceCard.className = "bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-center mb-6 text-base sm:text-lg font-medium text-emerald-950 leading-relaxed";
+            sentenceCard.innerHTML = q.sentence;
+            container.appendChild(sentenceCard);
+
+            // Clickable gaps logic setup
+            sentenceCard.querySelector("#gap-0").onclick = () => removeChosenGap(0);
+            sentenceCard.querySelector("#gap-0").classList.add("cursor-pointer", "hover:bg-emerald-200");
+            sentenceCard.querySelector("#gap-1").onclick = () => removeChosenGap(1);
+            sentenceCard.querySelector("#gap-1").classList.add("cursor-pointer", "hover:bg-emerald-200");
+
+            // Option pool
+            const listHeader = document.createElement("p");
+            listHeader.className = "text-xs text-emerald-500 font-bold mb-2 uppercase";
+            listHeader.innerText = "Select 2 Options below:";
+            container.appendChild(listHeader);
+
+            const optionsWrapper = document.createElement("div");
+            optionsWrapper.className = "grid grid-cols-2 sm:grid-cols-3 gap-2";
+
+            q.options.forEach(word => {
+                const btn = document.createElement("button");
+                btn.innerText = word;
+                btn.dataset.word = word;
+                btn.className = "px-4 py-2.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-emerald-800 hover:bg-emerald-50 hover:border-emerald-300 transition shadow-sm active:scale-95 text-sm sm:text-base cursor-pointer";
+                
+                btn.onclick = () => handleChoose2WordSelect(word, btn);
+                optionsWrapper.appendChild(btn);
+            });
+
+            container.appendChild(optionsWrapper);
+        }
+
+        function handleChoose2WordSelect(word, buttonElement) {
+            // Play pronunciation voice on select immediately
+            speakText(word);
+
+            // Verify if word is already chosen
+            const alreadyIdx = choose2SelectedWords.indexOf(word);
+            if (alreadyIdx !== -1) {
+                // Remove choice
+                removeChosenGap(alreadyIdx);
+                return;
+            }
+
+            // Assign word to first empty slot
+            let assignedIdx = -1;
+            if (choose2SelectedWords[0] === null) {
+                assignedIdx = 0;
+            } else if (choose2SelectedWords[1] === null) {
+                assignedIdx = 1;
+            }
+
+            if (assignedIdx !== -1) {
+                choose2SelectedWords[assignedIdx] = word;
+                buttonElement.classList.remove("bg-white", "text-emerald-800");
+                buttonElement.classList.add("bg-emerald-600", "text-white", "border-emerald-600");
+                updateChoose2Visuals();
+            }
+        }
+
+        function removeChosenGap(gapIdx) {
+            const removedWord = choose2SelectedWords[gapIdx];
+            if (!removedWord) return;
+
+            choose2SelectedWords[gapIdx] = null;
+            updateChoose2Visuals();
+
+            // Revert state for option buttons
+            const buttons = Array.from(document.querySelectorAll("[data-word]"));
+            const targetBtn = buttons.find(b => b.dataset.word === removedWord);
+            if (targetBtn) {
+                targetBtn.classList.add("bg-white", "text-emerald-800");
+                targetBtn.classList.remove("bg-emerald-600", "text-white", "border-emerald-600");
+            }
+        }
+
+        function updateChoose2Visuals() {
+            const gap0 = document.getElementById("gap-0");
+            const gap1 = document.getElementById("gap-1");
+
+            if (gap0) {
+                gap0.innerText = choose2SelectedWords[0] ? choose2SelectedWords[0] : "_____";
+                gap0.className = choose2SelectedWords[0] 
+                    ? "px-3 py-1 bg-emerald-600 border-b-2 border-emerald-800 text-white rounded mx-1 font-bold inline-block text-center min-w-[70px] align-middle cursor-pointer"
+                    : "px-3 py-1 bg-emerald-100 border-b-2 border-emerald-600 text-emerald-900 rounded mx-1 font-bold inline-block text-center min-w-[70px] align-middle cursor-pointer hover:bg-emerald-200";
+            }
+            if (gap1) {
+                gap1.innerText = choose2SelectedWords[1] ? choose2SelectedWords[1] : "_____";
+                gap1.className = choose2SelectedWords[1] 
+                    ? "px-3 py-1 bg-emerald-600 border-b-2 border-emerald-800 text-white rounded mx-1 font-bold inline-block text-center min-w-[70px] align-middle cursor-pointer"
+                    : "px-3 py-1 bg-emerald-100 border-b-2 border-emerald-600 text-emerald-900 rounded mx-1 font-bold inline-block text-center min-w-[70px] align-middle cursor-pointer hover:bg-emerald-200";
+            }
+        }
+
+        // --- STREAMING_CHUNK: Coding standard multiple choice questions ---
+        // MCQ Questions Renderer
+        function renderMCQ(q, container) {
+            mcqSelectedKey = null;
+
+            const grid = document.createElement("div");
+            grid.className = "flex flex-col gap-3";
+
+            q.options.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "mcq-option flex items-center gap-4 w-full p-4 text-left border-2 border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50 rounded-2xl transition duration-150 group active:scale-[0.99] cursor-pointer";
+                btn.dataset.key = opt.key;
+
+                // Option prefix circle (A, B, C...)
+                const circle = document.createElement("div");
+                circle.innerText = opt.key;
+                circle.className = "w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold text-sm border border-emerald-100 group-hover:bg-white group-hover:border-emerald-200 transition";
+
+                const label = document.createElement("span");
+                label.innerText = opt.text;
+                label.className = "font-semibold text-emerald-900 text-base";
+
+                btn.appendChild(circle);
+                btn.appendChild(label);
+
+                btn.onclick = () => selectMCQOption(opt, btn);
+
+                grid.appendChild(btn);
+            });
+
+            container.appendChild(grid);
+        }
+
+        function selectMCQOption(opt, btnElement) {
+            // Speak selection text
+            speakText(opt.text);
+
+            mcqSelectedKey = opt.key;
+
+            // Highlight chosen buttons
+            const options = Array.from(document.querySelectorAll(".mcq-option"));
+            options.forEach(optBtn => {
+                optBtn.classList.remove("border-emerald-600", "bg-emerald-50/70");
+                const circle = optBtn.querySelector("div");
+                circle.classList.remove("bg-emerald-600", "text-white", "border-emerald-600");
+                circle.classList.add("bg-emerald-50", "text-emerald-800");
+            });
+
+            btnElement.classList.add("border-emerald-600", "bg-emerald-50/70");
+            const activeCircle = btnElement.querySelector("div");
+            activeCircle.classList.remove("bg-emerald-50", "text-emerald-800");
+            activeCircle.classList.add("bg-emerald-600", "text-white", "border-emerald-600");
+        }
+
+        // --- STREAMING_CHUNK: Processing user response correctness checks ---
+        // Evaluation logic
+        function checkCurrentAnswer() {
+            const q = QUESTIONS[currentQuestionIdx];
+            let isCorrect = false;
+
+            if (q.type === "unscramble") {
+                // Ignore spaces completely when checking correctness
+                isCorrect = (typedClean.toLowerCase() === targetClean.toLowerCase());
+            } 
+            else if (q.type === "choose2") {
+                // Filter array and match contents in any order
+                const filteredChoices = choose2SelectedWords.filter(v => v !== null).map(v => v.toLowerCase());
+                if (filteredChoices.length === 2) {
+                    const sortedAnswers = [...q.correct].map(v => v.toLowerCase()).sort();
+                    const sortedChoices = [...filteredChoices].sort();
+                    isCorrect = (JSON.stringify(sortedAnswers) === JSON.stringify(sortedChoices));
+                }
+            } 
+            else if (q.type === "mcq") {
+                if (!mcqSelectedKey) {
+                    showWarningMessage("Please select an option before checking.");
+                    return;
+                }
+                const chosenOption = q.options.find(o => o.key === mcqSelectedKey);
+                isCorrect = chosenOption ? chosenOption.correct : false;
+            }
+
+            // Grade Feedback Engine
+            if (isCorrect) {
+                handleCorrectAnswer();
+            } else {
+                handleIncorrectAnswer(q);
+            }
+        }
+
+        // --- STREAMING_CHUNK: Directing flow for correct or incorrect answers ---
+        // Action when student yields a valid correctness match
+        function handleCorrectAnswer() {
+            playSoundEffect('success');
+            speakRandomPraise();
+
+            if (attempts === 0) {
+                firstTryCorrectCount++;
+            }
+
+            // Show 'Next' navigation element
+            document.getElementById("btn-submit").classList.add("hidden");
+            document.getElementById("btn-next").classList.remove("hidden");
+            document.getElementById("btn-next").focus();
+        }
+
+        function handleIncorrectAnswer(q) {
+            attempts++;
+            updateAttemptsBadge();
+            playSoundEffect('failure');
+
+            const feedbackEl = document.getElementById("feedback-message");
+
+            if (attempts >= 3) {
+                // Display structural correction details directly on workspace card
+                let solutionString = "";
+                if (q.type === "unscramble") {
+                    solutionString = `"${q.word}"`;
+                } else if (q.type === "choose2") {
+                    solutionString = `"${q.correct.join(' and ')}"`;
+                } else if (q.type === "mcq") {
+                    const correctOpt = q.options.find(o => o.correct);
+                    solutionString = `"${correctOpt.key}. ${correctOpt.text}"`;
+                }
+
+                feedbackEl.innerHTML = `
+                    <span class="text-rose-600 flex items-center gap-1.5 font-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-rose-600">
+                          <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Correct answer is: ${solutionString}</span>
+                    </span>
+                `;
+
+                // Auto-read correct spelling speech voice helper
+                speakText("The correct answer is " + (q.type === "unscramble" ? q.word : solutionString));
+
+                // Force layout next button
+                document.getElementById("btn-submit").classList.add("hidden");
+                document.getElementById("btn-next").classList.remove("hidden");
+                document.getElementById("btn-next").focus();
+            } else {
+                // Mild prompt for retrying the challenge
+                feedbackEl.innerHTML = `
+                    <span class="text-amber-600 flex items-center gap-1.5 font-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-amber-500">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        <span>Incorrect. Try again!</span>
+                    </span>
+                `;
+                speakText("Please try again.");
+
+                // Reset specific exercises inputs so student can retry seamlessly
+                if (q.type === "unscramble") {
+                    typedClean = "";
+                    const hiddenInput = document.getElementById("unscramble-hidden-input");
+                    if (hiddenInput) {
+                        hiddenInput.value = "";
+                        hiddenInput.focus();
+                    }
+                    updateUnscrambleDisplay(q);
+                } else if (q.type === "choose2") {
+                    // Reset chosen variables
+                    choose2SelectedWords = [null, null];
+                    updateChoose2Visuals();
+                    // Clear selected button styles
+                    const buttons = Array.from(document.querySelectorAll("[data-word]"));
+                    buttons.forEach(b => {
+                        b.className = "px-4 py-2.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-emerald-800 hover:bg-emerald-50 hover:border-emerald-300 transition shadow-sm active:scale-95 text-sm sm:text-base cursor-pointer";
+                    });
+                } else if (q.type === "mcq") {
+                    mcqSelectedKey = null;
+                    const options = Array.from(document.querySelectorAll(".mcq-option"));
+                    options.forEach(optBtn => {
+                        optBtn.classList.remove("border-emerald-600", "bg-emerald-50/70");
+                        const circle = optBtn.querySelector("div");
+                        circle.classList.remove("bg-emerald-600", "text-white", "border-emerald-600");
+                        circle.classList.add("bg-emerald-50", "text-emerald-800");
+                    });
+                }
+            }
+        }
+
+        function updateAttemptsBadge() {
+            document.getElementById("attempts-badge").innerText = `Attempts: ${attempts}/3`;
+        }
+
+        function showWarningMessage(text) {
+            const feedbackEl = document.getElementById("feedback-message");
+            feedbackEl.innerHTML = `
+                <span class="text-amber-500 flex items-center gap-1.5 font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                    </svg>
+                    <span>${text}</span>
+                </span>
+            `;
+            speakText(text);
+        }
+
+        // --- STREAMING_CHUNK: Navigating between slides and reporting stats ---
+        // Advancing viewport frames
+        function advanceNextQuestion() {
+            if (currentQuestionIdx < totalQuestionsLoaded - 1) {
+                currentQuestionIdx++;
+                loadQuestion(currentQuestionIdx);
+            } else {
+                renderEndGameReport();
+            }
+        }
+
+        // Display Score summary dashboard
+        function renderEndGameReport() {
+            document.getElementById("quiz-area").classList.add("hidden");
+            document.getElementById("quiz-progress-badge").classList.add("hidden");
+            
+            const scoreboard = document.getElementById("scoreboard-screen");
+            scoreboard.classList.remove("hidden");
+
+            const accuracy = Math.round((firstTryCorrectCount / totalQuestionsLoaded) * 100);
+
+            document.getElementById("stat-perfect").innerText = firstTryCorrectCount;
+            document.getElementById("stat-total").innerText = totalQuestionsLoaded;
+            document.getElementById("stat-accuracy").innerText = `${accuracy}%`;
+
+            const verbalCongrats = `You completed the session! Your first-try score is ${firstTryCorrectCount} out of ${totalQuestionsLoaded}.`;
+            speakText(verbalCongrats);
+        }
+
+        // Fisher-Yates array shuffling
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- STREAMING_CHUNK: Binding physical enter key submissions ---
+        // Allow physical 'Enter' keystrokes on Desktop platforms
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                // Detect active layout screen and proceed with contextual behavior
+                const welcomeIsActive = !document.getElementById("welcome-screen").classList.contains("hidden");
+                const quizIsActive = !document.getElementById("quiz-area").classList.contains("hidden");
+                const scoreboardIsActive = !document.getElementById("scoreboard-screen").classList.contains("hidden");
+
+                if (welcomeIsActive) {
+                    const startBtn = document.getElementById("btn-start-quiz");
+                    if (startBtn && !startBtn.classList.contains("hidden")) {
+                        startQuiz();
+                    } else {
+                        playVideoIntro();
+                    }
+                } else if (quizIsActive) {
+                    // Check if 'Next' button is showing, trigger transition
+                    const btnNext = document.getElementById("btn-next");
+                    if (btnNext && !btnNext.classList.contains("hidden")) {
+                        advanceNextQuestion();
+                    } else {
+                        checkCurrentAnswer();
+                    }
+                } else if (scoreboardIsActive) {
+                    restartEntireQuiz();
+                }
+            }
+        });
+
+        // Initialize voice engine on browser boot
+        window.onload = function() {
+            initSpeech();
+        };
+    </script>
+</body>
+</html>
