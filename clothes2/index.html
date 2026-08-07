@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What Are You Wearing? - Interactive English Quiz</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Font: Inter & Fredoka for young learners -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Fredoka', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#035480',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #fbcfe8 100%);
+      min-height: 100vh;
+    }
+    
+    .font-display {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+
+    .slot-box {
+      min-width: 70px;
+      min-height: 52px;
+      border: 2px dashed #94a3b8;
+      transition: all 0.2s ease;
+    }
+
+    .slot-box.filled {
+      border: 2px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+
+    .word-chip {
+      user-select: none;
+      touch-action: manipulation;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .word-chip:active {
+      transform: scale(0.95);
+    }
+
+    @keyframes bounce-short {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .animate-bounce-short {
+      animation: bounce-short 0.4s ease infinite;
+    }
+
+    @keyframes pulse-subtle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .pulse-animation {
+      animation: pulse-subtle 1.8s infinite;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 antialiased selection:bg-sky-200 selection:text-sky-900">
+
+  <header class="w-full bg-white/80 backdrop-blur-md border-b border-sky-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center text-white text-xl shadow-md">
+          <i class="fa-solid fa-shirt"></i>
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-lg md:text-xl text-slate-800 leading-tight">Fun English Practice</h1>
+          <p class="text-xs text-slate-500 font-medium">Topic: Clothes & Apparel</p>
+        </div>
+      </div>
+      
+      <div id="speaker-indicator" class="flex items-center gap-2 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-200 text-xs font-semibold text-sky-700">
+        <i class="fa-solid fa-volume-high text-sky-500 animate-pulse"></i>
+        <span>Audio Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center items-center">
+
+    <!-- SCREEN 1: WELCOME & VIDEO PROMPT -->
+    <section id="screen-welcome" class="w-full bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-sky-100 text-center max-w-2xl transform transition-all duration-300">
+      <div class="inline-block p-4 bg-amber-100 text-amber-600 rounded-full mb-4 shadow-inner">
+        <i class="fa-solid fa-film text-4xl"></i>
+      </div>
+      
+      <h2 class="font-display text-2xl md:text-4xl font-bold text-slate-800 mb-3">
+        Lesson Video First!
+      </h2>
+      <p class="text-slate-600 mb-6 text-sm md:text-base leading-relaxed">
+        Please watch the interactive video before starting your quiz practice. Click the video link below to open YouTube in a new tab!
+      </p>
+
+      <!-- Video Target Link -->
+      <a 
+        id="video-link"
+        href="https://youtu.be/xvQOUNQTSS0" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-3 bg-red-500 hover:bg-red-600 text-white font-display font-bold text-lg px-6 py-4 rounded-2xl shadow-lg hover:shadow-red-200 transition-all transform hover:-translate-y-0.5 mb-8 w-full sm:w-auto justify-center pulse-animation"
+      >
+        <i class="fa-brands fa-youtube text-2xl"></i>
+        <span>"What are you wearing?" Video</span>
+        <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-80"></i>
+      </a>
+
+      <div class="border-t border-slate-100 pt-6">
+        <p id="video-hint" class="text-xs text-amber-600 bg-amber-50 py-2 px-4 rounded-xl inline-block mb-4">
+          <i class="fa-solid fa-circle-info mr-1"></i> Click the YouTube link above to unlock the practice quiz!
+        </p>
+
+        <div>
+          <button 
+            id="start-btn"
+            disabled
+            class="w-full sm:w-auto font-display font-bold text-lg px-8 py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 mx-auto bg-slate-200 text-slate-400 cursor-not-allowed"
+          >
+            <span>Start Practice Quiz</span>
+            <i class="fa-solid fa-play"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: QUIZ INTERACTION -->
+    <section id="screen-quiz" class="hidden w-full max-w-3xl bg-white rounded-3xl p-5 md:p-8 shadow-xl border border-sky-100 flex-col gap-6">
+      
+      <!-- Quiz Progress Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-bold text-sky-600 block">Question</span>
+          <span id="question-counter" class="font-display text-xl md:text-2xl font-bold text-slate-800">1 / 9</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-1/3 bg-slate-100 rounded-full h-3 overflow-hidden">
+          <div id="progress-bar" class="bg-sky-500 h-full w-0 transition-all duration-300"></div>
+        </div>
+
+        <!-- Speaker button -->
+        <button 
+          id="listen-sentence-btn"
+          class="bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white p-3 md:px-4 md:py-2.5 rounded-2xl shadow-md transition-all flex items-center gap-2 font-display font-semibold text-sm"
+          title="Listen to entire sentence"
+        >
+          <i class="fa-solid fa-volume-high text-lg"></i>
+          <span class="hidden md:inline">Listen Again</span>
+        </button>
+      </div>
+
+      <!-- Question Instruction -->
+      <div class="text-center space-y-1">
+        <h3 class="font-display text-xl md:text-2xl font-bold text-slate-800">
+          Unscramble the sentence
+        </h3>
+        <p class="text-xs md:text-sm text-slate-500">
+          Tap word tiles or click in order to construct the correct sentence.
+        </p>
+      </div>
+
+      <!-- Question Illustration Container -->
+      <div class="flex justify-center my-1">
+        <div class="relative w-full max-w-xs h-40 md:h-48 rounded-2xl overflow-hidden shadow-md border-2 border-sky-100 bg-slate-50 flex items-center justify-center group">
+          <img 
+            id="question-img" 
+            src="" 
+            alt="Question Illustration" 
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0f2fe/0369a1?text=Clothes+Question';"
+          />
+          <div id="image-badge" class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5">
+            <i id="image-icon" class="fa-solid fa-shirt"></i>
+            <span id="image-label">Clothes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Word Slots Container -->
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 md:p-6 min-h-[120px] flex flex-wrap items-center justify-center gap-2 md:gap-3 shadow-inner" id="slots-container">
+        <!-- Target slots will be generated via JavaScript -->
+      </div>
+
+      <!-- Scrambled Word Chips Bank -->
+      <div>
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">Word Bank</div>
+        <div id="words-bank" class="flex flex-wrap items-center justify-center gap-2 md:gap-3 min-h-[80px]">
+          <!-- Word chips will be generated here -->
+        </div>
+      </div>
+
+      <!-- Quiz Controls -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 pt-4">
+        <button 
+          id="clear-btn"
+          class="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 text-slate-600 font-semibold hover:bg-slate-100 transition text-sm flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Reset Sentence</span>
+        </button>
+
+        <div class="w-full sm:w-auto flex gap-3">
+          <button 
+            id="check-btn"
+            class="w-full sm:w-auto flex-1 font-display font-bold text-base bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-slate-900 px-8 py-3.5 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+          >
+            <span>Check Answer</span>
+            <i class="fa-solid fa-check text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feedback Area -->
+      <div id="feedback-card" class="hidden rounded-2xl p-4 border text-center transition-all animate-bounce-short">
+        <div id="feedback-title" class="font-display font-bold text-lg md:text-xl"></div>
+        <div id="feedback-message" class="text-sm mt-1"></div>
+        <button id="next-btn" class="hidden mt-4 bg-sky-600 hover:bg-sky-700 text-white font-display font-bold px-6 py-2.5 rounded-xl shadow-md transition mx-auto">
+          Next Question <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+
+      <!-- Desktop Enter Key Hint -->
+      <p class="text-center text-xs text-slate-400 hidden md:block">
+        <i class="fa-solid fa-keyboard mr-1"></i> Tip: Press <kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-600 font-mono text-xs">Enter</kbd> to check your answer or go to the next question.
+      </p>
+    </section>
+
+    <!-- SCREEN 3: QUIZ SUMMARY -->
+    <section id="screen-summary" class="hidden w-full max-w-xl bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-sky-100 text-center flex-col items-center">
+      <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center text-amber-500 text-4xl mb-4 shadow-inner">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+
+      <h2 class="font-display text-3xl font-bold text-slate-800 mb-2">Quiz Completed!</h2>
+      <p class="text-slate-500 text-sm mb-6">Great effort practicing your English sentences today!</p>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-2 gap-4 w-full mb-8">
+        <div class="bg-sky-50 border border-sky-100 rounded-2xl p-4">
+          <span class="block text-xs font-semibold text-sky-600 uppercase">Correct First Try</span>
+          <span id="stat-first-try" class="font-display text-3xl font-bold text-sky-700">0</span>
+        </div>
+        <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4">
+          <span class="block text-xs font-semibold text-amber-600 uppercase">Total Completed</span>
+          <span id="stat-total" class="font-display text-3xl font-bold text-amber-700">9 / 9</span>
+        </div>
+      </div>
+
+      <!-- Restart Button -->
+      <button 
+        id="restart-btn"
+        class="w-full font-display font-bold text-lg bg-sky-500 hover:bg-sky-600 text-white px-8 py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+      >
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Try Again (Shuffle Questions)</span>
+      </button>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-4 text-xs text-slate-400">
+    Designed for English Learners • Interactive Quiz Platform
+  </footer>
+
+  <script>
+    // ----------------------------------------------------
+    // QUESTION DATASET (9 Sentences with Images)
+    // ----------------------------------------------------
+    const MASTER_QUESTIONS = [
+      {
+        sentence: "Children, what are you wearing?",
+        image: "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?auto=format&fit=crop&w=600&q=80",
+        label: "Children",
+        icon: "fa-solid fa-child-reaching"
+      },
+      {
+        sentence: "I am wearing white socks",
+        image: "https://m.media-amazon.com/images/I/81JyCTyf98L._AC_UY350_.jpg?auto=format&fit=crop&w=600&q=80",
+        label: "White Socks",
+        icon: "fa-solid fa-socks"
+      },
+      {
+        sentence: "I am wearing blue pants",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTT7dHNUFuv1U5egoKQZ_Za7IxB7twg9W7ktx_WpVYgD1KfByXRJ4KF3mA&s=10?auto=format&fit=crop&w=600&q=80",
+        label: "Blue Pants",
+        icon: "fa-solid fa-vest"
+      },
+      {
+        sentence: "I am wearing a purple shirt",
+        image: "https://www.barrywang.com/cdn/shop/articles/30.png?v=1753166782?auto=format&fit=crop&w=600&q=80",
+        label: "Purple Shirt",
+        icon: "fa-solid fa-shirt"
+      },
+      {
+        sentence: "I am wearing a pink dress",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-mBLxEIk_AEocVJPmpFiSV1H5KiBA6CEnNz-qXyWD4Cvseo4BL3fgDr_i&s=10?auto=format&fit=crop&w=600&q=80",
+        label: "Pink Dress",
+        icon: "fa-solid fa-person-dress"
+      },
+      {
+        sentence: "I am wearing a green hat",
+        image: "https://thumbs.dreamstime.com/b/raising-green-hipster-leprechaun-costume-touching-hat-irish-man-beard-wearing-green-bearded-man-celebrating-141955194.jpg?auto=format&fit=crop&w=600&q=80",
+        label: "Green Hat",
+        icon: "fa-solid fa-hat-cowboy"
+      },
+      {
+        sentence: "He is wearing a black bag",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjlkMCnQcx0cZV9VUDAHqKdlRlFvfLIM-9ZRvdCto0LgY744tOdJas0sI&s=10?auto=format&fit=crop&w=600&q=80",
+        label: "Black Bag",
+        icon: "fa-solid fa-bag-shopping"
+      },
+      {
+        sentence: "She is wearing a yellow skirt",
+        image: "https://luxehardy.com/cdn/shop/files/ana-puff-sleeve-top-and-high-low-flared-skirt_printedlacepartywear_birthdaydressesforgirls.jpg?v=1773385523&width=1000?auto=format&fit=crop&w=600&q=80",
+        label: "Yellow Skirt",
+        icon: "fa-solid fa-person-dress"
+      },
+      {
+        sentence: "They are wearing orange coats",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRz5C_83IsxSPwSbChddXSjCXIPdlVot7QSjbC8-ZPfLw&s=10?auto=format&fit=crop&w=600&q=80",
+        label: "Orange Coats",
+        icon: "fa-solid fa-user-ninja"
+      }
+    ];
+
+    const PRAISE_LIST = [
+      "Well done!",
+      "Good job!",
+      "Excellent!",
+      "Very good!"
+    ];
+
+    // App State
+    let quizQuestions = [];
+    let currentQuestionIndex = 0;
+    let selectedWords = [];
+    let currentScrambled = [];
+    let wrongAttempts = 0;
+    let firstTryCorrectCount = 0;
+    let videoWatched = false;
+    let currentPraise = "";
+
+    // DOM Elements
+    const screenWelcome = document.getElementById('screen-welcome');
+    const screenQuiz = document.getElementById('screen-quiz');
+    const screenSummary = document.getElementById('screen-summary');
+    const videoLink = document.getElementById('video-link');
+    const startBtn = document.getElementById('start-btn');
+    const videoHint = document.getElementById('video-hint');
+
+    const questionImg = document.getElementById('question-img');
+    const imageIcon = document.getElementById('image-icon');
+    const imageLabel = document.getElementById('image-label');
+
+    const slotsContainer = document.getElementById('slots-container');
+    const wordsBank = document.getElementById('words-bank');
+    const questionCounter = document.getElementById('question-counter');
+    const progressBar = document.getElementById('progress-bar');
+    const listenSentenceBtn = document.getElementById('listen-sentence-btn');
+    const checkBtn = document.getElementById('check-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    const feedbackCard = document.getElementById('feedback-card');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const nextBtn = document.getElementById('next-btn');
+
+    const statFirstTry = document.getElementById('stat-first-try');
+    const statTotal = document.getElementById('stat-total');
+    const restartBtn = document.getElementById('restart-btn');
+
+    // ----------------------------------------------------
+    // WEB AUDIO & SPEECH SYNTHESIS
+    // ----------------------------------------------------
+    let audioCtx = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtx = new AudioContext();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Play synthesized sound effects (Correct / Wrong)
+    function playSoundEffect(type) {
+      initAudioContext();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'correct') {
+        // High upbeat chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'wrong') {
+        // Low double buzz
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.setValueAtTime(130, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+    }
+
+    // Speech Synthesis setup (Female voice, slow & clear)
+    function speakText(text, onEndCallback = null) {
+      if (!('speechSynthesis' in window)) {
+        if (onEndCallback) onEndCallback();
+        return;
+      }
+
+      window.speechSynthesis.cancel(); // stop current sound
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.8; // Slow & clear
+      utterance.pitch = 1.15; // Higher pitch for friendly female tone
+      utterance.lang = 'en-US';
+
+      // Attempt to pick a female voice
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const femaleVoice = voices.find(v => 
+          v.lang.startsWith('en') && (
+            v.name.includes('Female') || 
+            v.name.includes('Samantha') || 
+            v.name.includes('Victoria') || 
+            v.name.includes('Zira') || 
+            v.name.includes('Google US English') ||
+            v.name.includes('Karen') ||
+            v.name.includes('Siri')
+          )
+        ) || voices.find(v => v.lang.startsWith('en'));
+
+        if (femaleVoice) {
+          utterance.voice = femaleVoice;
+        }
+      }
+
+      if (onEndCallback) {
+        utterance.onend = onEndCallback;
+        utterance.onerror = onEndCallback;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Ensure voices are loaded
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    // ----------------------------------------------------
+    // UTILITY FUNCTIONS
+    // ----------------------------------------------------
+    // Shuffle array helper
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // ----------------------------------------------------
+    // GAME INITIALIZATION & SCREEN MANAGEMENT
+    // ----------------------------------------------------
+    videoLink.addEventListener('click', () => {
+      videoWatched = true;
+      startBtn.disabled = false;
+      startBtn.className = "w-full sm:w-auto font-display font-bold text-lg px-8 py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 mx-auto bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-slate-900 cursor-pointer transform hover:-translate-y-0.5 pulse-animation";
+      videoHint.className = "text-xs text-emerald-600 bg-emerald-50 py-2 px-4 rounded-xl inline-block mb-4";
+      videoHint.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Video link clicked! You can now start the quiz.';
+    });
+
+    startBtn.addEventListener('click', () => {
+      initAudioContext();
+      startQuiz();
+    });
+
+    restartBtn.addEventListener('click', () => {
+      startQuiz();
+    });
+
+    function startQuiz() {
+      // Prepare shuffled questions
+      quizQuestions = shuffleArray(MASTER_QUESTIONS);
+      currentQuestionIndex = 0;
+      firstTryCorrectCount = 0;
+
+      screenWelcome.classList.add('hidden');
+      screenSummary.classList.add('hidden');
+      screenQuiz.classList.remove('hidden');
+      screenQuiz.classList.add('flex');
+
+      loadQuestion(currentQuestionIndex);
+    }
+
+    // ----------------------------------------------------
+    // QUESTION HANDLING
+    // ----------------------------------------------------
+    function loadQuestion(index) {
+      wrongAttempts = 0;
+      selectedWords = [];
+      hideFeedback();
+
+      const qObj = quizQuestions[index];
+      const fullSentence = qObj.sentence;
+      const words = fullSentence.split(' ');
+
+      // Update question image and details
+      questionImg.src = qObj.image;
+      questionImg.alt = qObj.label;
+      imageLabel.textContent = qObj.label;
+      imageIcon.className = qObj.icon;
+
+      // Create scrambled word bank ensuring it is not already solved
+      let scrambled = shuffleArray(words);
+      if (words.length > 1 && scrambled.join(' ') === fullSentence) {
+        scrambled = shuffleArray(words);
+      }
+      currentScrambled = scrambled;
+
+      // Update UI elements
+      questionCounter.textContent = `${index + 1} / ${quizQuestions.length}`;
+      progressBar.style.width = `${((index + 1) / quizQuestions.length) * 100}%`;
+
+      renderSlots(words.length);
+      renderWordBank(currentScrambled);
+
+      // Auto-speak sentence at question start
+      setTimeout(() => {
+        speakText(fullSentence);
+      }, 400);
+    }
+
+    function renderSlots(totalSlots) {
+      slotsContainer.innerHTML = '';
+      for (let i = 0; i < totalSlots; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'slot-box rounded-xl flex items-center justify-center p-2 text-center cursor-pointer font-display font-semibold text-slate-800 text-sm md:text-base';
+        
+        if (selectedWords[i]) {
+          slot.classList.add('filled');
+          slot.textContent = selectedWords[i];
+          slot.addEventListener('click', () => removeWordAt(i));
+        } else {
+          slot.innerHTML = `<span class="text-slate-300 text-xs font-mono">${i + 1}</span>`;
+        }
+        slotsContainer.appendChild(slot);
+      }
+    }
+
+    function renderWordBank(words) {
+      wordsBank.innerHTML = '';
+      
+      // Count frequency of available words in bank vs placed
+      const placedCounts = {};
+      selectedWords.forEach(w => {
+        placedCounts[w] = (placedCounts[w] || 0) + 1;
+      });
+
+      words.forEach((word, wordIndex) => {
+        // Calculate how many of this exact word have been placed
+        let countInBank = 0;
+        words.forEach((w, idx) => {
+          if (w === word && idx <= wordIndex) countInBank++;
+        });
+
+        const isUsed = (placedCounts[word] || 0) >= countInBank;
+
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = `word-chip font-display font-semibold text-sm md:text-base px-4 py-2.5 rounded-xl shadow-sm border transition ${
+          isUsed 
+            ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed opacity-40' 
+            : 'bg-white hover:bg-sky-50 text-slate-800 border-sky-200 active:scale-95 cursor-pointer hover:border-sky-400'
+        }`;
+        chip.textContent = word;
+        
+        if (!isUsed) {
+          chip.addEventListener('click', () => addWordToSlots(word));
+        }
+
+        wordsBank.appendChild(chip);
+      });
+    }
+
+    function addWordToSlots(word) {
+      const targetLength = quizQuestions[currentQuestionIndex].sentence.split(' ').length;
+      if (selectedWords.length < targetLength) {
+        selectedWords.push(word);
+        speakText(word.replace(/[^a-zA-Z]/g, "")); // Speak single word
+        renderSlots(targetLength);
+        renderWordBank(currentScrambled);
+      }
+    }
+
+    function removeWordAt(index) {
+      if (index >= 0 && index < selectedWords.length) {
+        selectedWords.splice(index, 1);
+        renderSlots(quizQuestions[currentQuestionIndex].sentence.split(' ').length);
+        renderWordBank(currentScrambled);
+      }
+    }
+
+    clearBtn.addEventListener('click', () => {
+      selectedWords = [];
+      renderSlots(quizQuestions[currentQuestionIndex].sentence.split(' ').length);
+      renderWordBank(currentScrambled);
+    });
+
+    listenSentenceBtn.addEventListener('click', () => {
+      speakText(quizQuestions[currentQuestionIndex].sentence);
+    });
+
+    // ----------------------------------------------------
+    // CHECK ANSWER LOGIC
+    // ----------------------------------------------------
+    checkBtn.addEventListener('click', checkAnswer);
+
+    function checkAnswer() {
+      const targetSentence = quizQuestions[currentQuestionIndex].sentence;
+      const userSentence = selectedWords.join(' ');
+
+      // Check if incomplete
+      if (selectedWords.length < targetSentence.split(' ').length) {
+        showFeedback('warning', 'Incomplete Sentence', 'Please fill all empty spaces with words before checking!');
+        return;
+      }
+
+      if (userSentence === targetSentence) {
+        // CORRECT ANSWER
+        playSoundEffect('correct');
+        
+        if (wrongAttempts === 0) {
+          firstTryCorrectCount++;
+        }
+
+        // Select random praise
+        currentPraise = PRAISE_LIST[Math.floor(Math.random() * PRAISE_LIST.length)];
+        
+        showFeedback('success', currentPraise, `Target: "${targetSentence}"`);
+        speakText(currentPraise + "! " + targetSentence);
+
+      } else {
+        // INCORRECT ANSWER
+        wrongAttempts++;
+        playSoundEffect('wrong');
+
+        if (wrongAttempts >= 3) {
+          // Exceeded 3 wrong attempts: Reveal answer
+          showFeedback('error', 'Keep Trying!', `The correct sentence is: <strong>"${targetSentence}"</strong>`);
+          speakText("The correct sentence is: " + targetSentence);
+        } else {
+          // Reset current attempt
+          showFeedback('wrong', 'Try Again!', `Incorrect order. (${3 - wrongAttempts} attempt(s) remaining)`);
+          
+          // Reset selected words on failure
+          setTimeout(() => {
+            selectedWords = [];
+            renderSlots(targetSentence.split(' ').length);
+            renderWordBank(currentScrambled);
+          }, 600);
+        }
+      }
+    }
+
+    function showFeedback(type, title, message) {
+      feedbackCard.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-rose-50', 'border-rose-200', 'text-rose-800', 'bg-amber-50', 'border-amber-200', 'text-amber-800');
+      nextBtn.classList.add('hidden');
+
+      feedbackTitle.textContent = title;
+      feedbackMessage.innerHTML = message;
+
+      if (type === 'success') {
+        feedbackCard.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+        nextBtn.classList.remove('hidden');
+        checkBtn.disabled = true;
+        checkBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else if (type === 'error') {
+        // Revealed correct answer after 3 fails
+        feedbackCard.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
+        nextBtn.classList.remove('hidden');
+        checkBtn.disabled = true;
+        checkBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else if (type === 'wrong') {
+        feedbackCard.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
+      } else if (type === 'warning') {
+        feedbackCard.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+      }
+
+      feedbackCard.classList.remove('hidden');
+    }
+
+    function hideFeedback() {
+      feedbackCard.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+      checkBtn.disabled = false;
+      checkBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    // Next Question Button
+    nextBtn.addEventListener('click', advanceQuestion);
+
+    function advanceQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < quizQuestions.length) {
+        loadQuestion(currentQuestionIndex);
+      } else {
+        showSummary();
+      }
+    }
+
+    // ----------------------------------------------------
+    // SUMMARY & KEYBOARD LISTENERS
+    // ----------------------------------------------------
+    function showSummary() {
+      screenQuiz.classList.add('hidden');
+      screenQuiz.classList.remove('flex');
+      screenSummary.classList.remove('hidden');
+      screenSummary.classList.add('flex');
+
+      statFirstTry.textContent = firstTryCorrectCount;
+      statTotal.textContent = `${quizQuestions.length} / ${quizQuestions.length}`;
+
+      // Play praise sound
+      speakText("Fantastic job! You completed all the exercises!");
+    }
+
+    // Keyboard 'Enter' key support for Desktop users
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        // Only if quiz screen is active
+        if (!screenQuiz.classList.contains('hidden')) {
+          if (!nextBtn.classList.contains('hidden')) {
+            // Next button visible -> trigger next question
+            advanceQuestion();
+          } else {
+            // Trigger check answer
+            checkAnswer();
+          }
+        }
+      }
+    });
+
+  </script>
+</body>
+</html>
